@@ -32,8 +32,11 @@ This API will give you only 20 books at a time.
 It accepts title, authors, isbn, publisher, and page as parameters.
 
 How to use the API?
+
 Build an interface in your app to interact with our API.
 Add a field to specify the number of books to import, at the very least.
 You may additionally give the librarian any set of parameters; for instance, they should be able to import 30 books titled "Harry Potter".
-Insert book records
+Insert book records.
+
+
 
