@@ -1,6 +1,8 @@
 from _datetime import datetime
-
+from flask_migrate import Migrate
 from flask import Flask, request, jsonify
+
+# from app.routes import hello
 from model import Db, Books, Member, BookMember
 
 app = Flask(__name__)
@@ -8,12 +10,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///LibraryManagement.db'  # Repl
 
 # Bind Db (SQLAlchemy) to the app
 Db.init_app(app)
-
+Migrate = Migrate(app, Db)
 
 def message(msg):
     return jsonify({"message": msg})
 
 
+# Bug possibility
 def is_record_available(arr, key, book_name):
     for key in arr:
         if key == book_name:
@@ -30,7 +33,7 @@ def calculate_debt(issue_date: datetime, cost_per_day: float) -> float:
 def get_books():
     books = Books.query.all()
     author, title = request.args.get("author"), request.args.get("title")
-    if (request.method == "GET"):
+    if request.method == "GET":
         if author and title:
             books = Books.query.filter(Books.author.like(author + "%")).filter(Books.title.like(title + "%")).all()
         elif author:
@@ -41,7 +44,6 @@ def get_books():
         return jsonify(books_list)
     else:
         # check if title exists, if yes increase the count
-        found = False
         books_list = [book.to_dict() for book in books]
         books = [book['title'] for book in books_list]
         if is_record_available(books, "title", request.json['title']):
@@ -81,7 +83,7 @@ def get_book(book_id):
 @app.route("/members", methods=["GET", "POST"])
 def member_fn():
     member_list = Member.query.all()
-    if (request.method == "GET"):
+    if request.method == "GET":
         return jsonify([member.to_dict() for member in member_list])
     else:
         user_name = request.json['name']
@@ -97,7 +99,7 @@ def member_fn():
 @app.route("/member/<int:member_id>", methods=["GET", "PATCH", "DELETE"])
 def get_member(member_id):
     member_details = Member.query.get(member_id)
-    if member_details == None:
+    if member_details is None:
         return message("No user exists")
     if request.method == "GET":
         return jsonify(member_details.to_dict())
@@ -128,11 +130,11 @@ def issue_book():
             return jsonify({'error': 'Book already issued to this member'}), 400
     book_details = Books.query.get(book_id)
     member_details = Member.query.get(member_id)
-    if (book_details == None or member_details == None):
+    if book_details is None or member_details is None:
         return message("Please check the provided details")
     else:
         count = book_details.to_dict()['book_count']
-        if (count <= 0):
+        if count <= 0:
             return message("Books stocked out")
         else:
             setattr(book_details, 'book_count', count - 1)
@@ -214,6 +216,10 @@ def calculate_my_debt():
             print(book_rent, debt)
     member_details = Member.query.get(member_id).to_dict()["name"]
     return message(F"{member_details} has to pay {debt} rupees")
+
+# @app.route("/hello", methods=["POST"])
+# def sayhello():
+#     return hello()
 
 
 if __name__ == '__main__':
