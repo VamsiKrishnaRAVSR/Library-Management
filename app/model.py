@@ -39,6 +39,11 @@ class BookMember(Db.Model):
 
     def to_dict(self):
         return {
-            id: self.id, "book_id": self.book_id, "member_id": self.member_id, "issue_date": self.issue_date,
-            "return_date": self.return_date, "debt": self.debt, "is_book_returned": self.is_book_returned
+            "id": self.id,
+            "book_id": self.book_id,
+            "member_id": self.member_id,
+            "issue_date": self.issue_date,
+            "return_date": self.return_date,
+            "debt": self.debt,
+            "is_book_returned": self.is_book_returned
         }
