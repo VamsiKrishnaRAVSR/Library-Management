@@ -1,6 +1,7 @@
 from flask_migrate import Migrate
 from flask import Flask, request, jsonify
 from functools import wraps
+from flask_bcrypt import Bcrypt
 
 from helper import response_formatter, calculate_debt, get_error_details
 from routes import get_books, post_book, update_book, delete_book, get_book, get_member_details, add_member_details, \
@@ -14,7 +15,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///LibraryManagement.db'  # Repl
 # Bind Db (SQLAlchemy) to the app
 Db.init_app(app)
 Migrate = Migrate(app, Db)
-
+bcrypt = Bcrypt(app)
 
 # Custom decorator to handle exceptions
 def handle_exceptions(func):
@@ -66,17 +67,17 @@ def get_members():
 
 @app.route("/members", methods=["POST"])
 def create_member():
-    return add_member_details()
+    return add_member_details(bcrypt)
 
 
 @app.route("/member/<int:member_id>")
 def get_member(member_id):
-    return get_member_details(member_id)
+    return get_member_details(member_id, bcrypt)
 
 
 @app.route("/member/<int:member_id>", methods=["PATCH"])
 def update_profile(member_id):
-    return update_member(member_id)
+    return update_member(member_id, bcrypt)
 
 
 @app.route("/member/<int:member_id>", methods=["DELETE"])

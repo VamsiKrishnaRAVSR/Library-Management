@@ -111,11 +111,15 @@ def get_members_details():
         return response_formatter(str(e), 500)
 
 
-def add_member_details():
+def add_member_details(bcrypt):
     try:
         member_list = Member.query.all()
         user_name = request.json['name']
+        email = request.json['email']
+        role = request.json['role']
+        password = request.json['password']
         missing_keys = get_missing_keys(member_properties, request.json)
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
         if missing_keys:
             return response_formatter(missing_keys, 400)
@@ -125,7 +129,7 @@ def add_member_details():
             info, status = get_error_details("ERR_MEMBER_EXISTS")
             return response_formatter(info, status)
         else:
-            new_member = Member(name=user_name)
+            new_member = Member(name=user_name, password=hashed_password, email=email, role=role)
             Db.session.add(new_member)
             Db.session.commit()
             info, status = get_error_details("MEMBER_ADDED_SUCCESS")
@@ -138,7 +142,7 @@ def add_member_details():
         return response_formatter(str(e), 500)
 
 
-def get_member_details(member_id):
+def get_member_details(member_id, bcrypt):
     try:
         member_details = Member.query.get(member_id)
         if member_details is None:
@@ -149,7 +153,7 @@ def get_member_details(member_id):
         return response_formatter(str(e), 500)
 
 
-def update_member(member_id):
+def update_member(member_id, bcrypt):
     try:
         member_details = Member.query.get(member_id)
         if member_details is None:
@@ -158,7 +162,11 @@ def update_member(member_id):
         else:
             for key, value in request.json.items():
                 if getattr(member_details, key) and key in member_allowed_properties:
-                    setattr(member_details, key, value)
+                    if(key=="password"):
+                        hashed_password = bcrypt.generate_password_hash(value).decode('utf-8')
+                        setattr(member_details, key, hashed_password)
+                    else:
+                        setattr(member_details, key, value)
             Db.session.commit()
             info, status = get_error_details("MEMBER_DETAILS_UPDATE_SUCCESS")
             return response_formatter(info, status)
