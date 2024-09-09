@@ -15,16 +15,25 @@ class Books(Db.Model):
 
     def to_dict(self):
         return {'id': self.id, 'title': self.title, 'author': self.author,
-                'isbn': self.isbn, 'publisher':self.publisher , 'book_count': self.book_count, 'book_rent': self.book_rent }
+                'isbn': self.isbn, 'publisher': self.publisher, 'book_count': self.book_count,
+                'book_rent': self.book_rent}
 
 
 class Member(Db.Model):
     id = Db.Column(Integer, primary_key=True, autoincrement=True)
     name = Db.Column(String)
+    email = Db.Column(String)
+    password = Db.Column(String)
+    role = Db.Column(String)
 
     def to_dict(self):
         return {
-            'id': self.id, 'name': self.name
+            'id': self.id, 'name': self.name, 'email': self.email, 'role': self.role
+        }
+
+    def update_profile(self):
+        return {
+            'id': self.id, 'name': self.name, 'email': self.email, 'role': self.role, 'password': self.password
         }
 
 
