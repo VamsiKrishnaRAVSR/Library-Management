@@ -1,13 +1,14 @@
 from flask_migrate import Migrate
 from flask import Flask, request, jsonify
 from functools import wraps
-from flask_bcrypt import Bcrypt
 
+from utils import compare_hashed_password
+from auth import auth_bp
 from helper import response_formatter, calculate_debt, get_error_details
 from routes import get_books, post_book, update_book, delete_book, get_book, get_member_details, add_member_details, \
     get_members_details, delete_member, update_member, issue_book, submit_book, get_highest_paying_members, \
     get_famous_books_list
-from model import Db, Books, Member, BookMember
+from model import Db, Books, BookMember
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///LibraryManagement.db'  # Replace with your desired database URI
@@ -15,7 +16,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///LibraryManagement.db'  # Repl
 # Bind Db (SQLAlchemy) to the app
 Db.init_app(app)
 Migrate = Migrate(app, Db)
-bcrypt = Bcrypt(app)
+FLASK_JWT_TOKEN_HEX = "5fa9bea3309c639564672ced"
+app.register_blueprint(auth_bp, url_prefix="/auth")
 
 # Custom decorator to handle exceptions
 def handle_exceptions(func):
@@ -65,19 +67,14 @@ def get_members():
     return get_members_details()
 
 
-@app.route("/members", methods=["POST"])
-def create_member():
-    return add_member_details(bcrypt)
-
-
 @app.route("/member/<int:member_id>")
 def get_member(member_id):
-    return get_member_details(member_id, bcrypt)
+    return get_member_details(member_id)
 
 
 @app.route("/member/<int:member_id>", methods=["PATCH"])
 def update_profile(member_id):
-    return update_member(member_id, bcrypt)
+    return update_member(member_id)
 
 
 @app.route("/member/<int:member_id>", methods=["DELETE"])

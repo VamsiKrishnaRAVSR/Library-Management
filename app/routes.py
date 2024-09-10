@@ -1,3 +1,4 @@
+from utils import generate_hashed_password
 from constants import book_properties, book_allowed_fields, member_properties, member_allowed_properties, \
     ERROR_CONSTANTS
 from helper import is_record_available, response_formatter, get_missing_keys, get_error_details, map_keys_to_values
@@ -111,19 +112,18 @@ def get_members_details():
         return response_formatter(str(e), 500)
 
 
-def add_member_details(bcrypt):
+def add_member_details():
     try:
         member_list = Member.query.all()
-        user_name = request.json['name']
-        email = request.json['email']
-        role = request.json['role']
-        password = request.json['password']
         missing_keys = get_missing_keys(member_properties, request.json)
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
         if missing_keys:
             return response_formatter(missing_keys, 400)
-
+        password = request.json['password']
+        hashed_password = generate_hashed_password(password)
+        user_name = request.json['name']
+        email = request.json['email']
+        role = request.json['role']
         member_name_list = [member.to_dict()['name'] for member in member_list]
         if is_record_available(member_name_list, user_name):
             info, status = get_error_details("ERR_MEMBER_EXISTS")
@@ -142,7 +142,7 @@ def add_member_details(bcrypt):
         return response_formatter(str(e), 500)
 
 
-def get_member_details(member_id, bcrypt):
+def get_member_details(member_id):
     try:
         member_details = Member.query.get(member_id)
         if member_details is None:
@@ -153,7 +153,7 @@ def get_member_details(member_id, bcrypt):
         return response_formatter(str(e), 500)
 
 
-def update_member(member_id, bcrypt):
+def update_member(member_id):
     try:
         member_details = Member.query.get(member_id)
         if member_details is None:
@@ -162,8 +162,8 @@ def update_member(member_id, bcrypt):
         else:
             for key, value in request.json.items():
                 if getattr(member_details, key) and key in member_allowed_properties:
-                    if(key=="password"):
-                        hashed_password = bcrypt.generate_password_hash(value).decode('utf-8')
+                    if key == "password":
+                        hashed_password = generate_hashed_password(value)
                         setattr(member_details, key, hashed_password)
                     else:
                         setattr(member_details, key, value)

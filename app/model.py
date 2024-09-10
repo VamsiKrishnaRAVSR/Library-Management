@@ -1,9 +1,7 @@
 from sqlalchemy import Integer, String, ForeignKey, DateTime, Float, Boolean
 from flask_sqlalchemy import SQLAlchemy
 
-
 Db = SQLAlchemy()
-
 
 
 class Books(Db.Model):
