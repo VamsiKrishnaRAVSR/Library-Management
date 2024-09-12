@@ -1,7 +1,10 @@
+from functools import wraps
+
 from flask import jsonify
 from _datetime import datetime
-
 from constants import ERROR_CONSTANTS
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt
+
 
 
 def response_formatter(msg, status_code=200):
@@ -49,3 +52,28 @@ def map_keys_to_values(keys_list, values_arr):
             dict[keys_list[k]] = i[k]
         arr.append(dict)
     return arr
+
+
+def admin_access_routes():
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            claims = get_jwt()
+            email, role = claims.get("sub") ,claims.get('role')
+            if not email or role != "admin":
+                return jsonify({"message": "Unauthorized"}), 403
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
+def get_email_from_jwt():
+    claims = get_jwt()
+    email = claims.get("sub")
+    return email
+
+
+def is_admin():
+    claims = get_jwt()
+    print(claims)
+    return claims.get("role") == "admin"

@@ -1,23 +1,39 @@
+import os
+from datetime import timedelta
 from flask_migrate import Migrate
 from flask import Flask, request, jsonify
 from functools import wraps
 
-from utils import compare_hashed_password
+from book import book_bp
+from books import books_bp
+from member import member_bp
+from members import members_bp
 from auth import auth_bp
-from helper import response_formatter, calculate_debt, get_error_details
-from routes import get_books, post_book, update_book, delete_book, get_book, get_member_details, add_member_details, \
-    get_members_details, delete_member, update_member, issue_book, submit_book, get_highest_paying_members, \
-    get_famous_books_list
+from helper import response_formatter, calculate_debt, get_error_details, admin_access_routes
+from routes import issue_book, submit_book, get_highest_paying_members, get_famous_books_list, get_params_details
 from model import Db, Books, BookMember
+from flask_jwt_extended import JWTManager, jwt_required
+from dotenv import load_dotenv
+load_dotenv()
+
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///LibraryManagement.db'  # Replace with your desired database URI
-
-# Bind Db (SQLAlchemy) to the app
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
 Db.init_app(app)
 Migrate = Migrate(app, Db)
-FLASK_JWT_TOKEN_HEX = "5fa9bea3309c639564672ced"
+app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=int(os.environ.get("JWT_ACCESS_TOKEN_EXPIRES", 1)))
+
+
+jwt = JWTManager()
+jwt.init_app(app)
+
 app.register_blueprint(auth_bp, url_prefix="/auth")
+app.register_blueprint(members_bp, url_prefix="/members")
+app.register_blueprint(member_bp, url_prefix="/member")
+app.register_blueprint(books_bp, url_prefix="/books")
+app.register_blueprint(book_bp, url_prefix="/book")
+
 
 # Custom decorator to handle exceptions
 def handle_exceptions(func):
@@ -37,52 +53,9 @@ def handle_exceptions(func):
     return wrapper
 
 
-@app.route("/books", methods=["GET"])
-def get_all_books():
-    return get_books()
-
-
-@app.route("/books", methods=["POST"])
-def create_new_book():
-    return post_book()
-
-
-@app.route("/books/<int:book_id>")
-def get_single_book(book_id):
-    return get_book(book_id)
-
-
-@app.route("/books/<int:book_id>", methods=["PATCH"])
-def update_book_details(book_id):
-    return update_book(book_id)
-
-
-@app.route("/books/<int:book_id>", methods=["DELETE"])
-def remove_book(book_id):
-    return delete_book(book_id)
-
-
-@app.route("/members")
-def get_members():
-    return get_members_details()
-
-
-@app.route("/member/<int:member_id>")
-def get_member(member_id):
-    return get_member_details(member_id)
-
-
-@app.route("/member/<int:member_id>", methods=["PATCH"])
-def update_profile(member_id):
-    return update_member(member_id)
-
-
-@app.route("/member/<int:member_id>", methods=["DELETE"])
-def delete_profile(member_id):
-    return delete_member(member_id)
-
-
 @app.route("/issue_book", methods=["POST"])
+@jwt_required()
+@admin_access_routes()
 @handle_exceptions
 def issue_book_to_user():
     return issue_book()
@@ -92,12 +65,16 @@ def issue_book_to_user():
 # update the book_id count
 # update the transaction debt and add to_date.
 @app.route("/submit_book", methods=["POST"])
+@jwt_required()
+@admin_access_routes()
 @handle_exceptions
 def update_book_status():
     return submit_book()
 
 
 @app.route("/get_transactions", methods=["GET"])
+@jwt_required()
+@admin_access_routes()
 @handle_exceptions
 def get_transactions():
     transaction_details = BookMember.query.all()
@@ -106,6 +83,8 @@ def get_transactions():
 
 
 @app.route("/get_transaction_debt", methods=["POST"])
+@jwt_required()
+@admin_access_routes()
 @handle_exceptions
 def calculate_transaction_debt():
     book_id, member_id = request.json['book_id'], request.json['member_id']
@@ -121,10 +100,11 @@ def calculate_transaction_debt():
     if debt > 500:
         return response_formatter(info.format(x=500), status)
     book_status = "Returned" if transaction_details.is_book_returned else "Not Returned"
-    return response_formatter(info.format(x=debt), status)
+    return response_formatter(info.format(x=debt), book_status)
 
 
 @app.route("/my_books", methods=["POST"])
+@jwt_required()
 @handle_exceptions
 def get_my_transactions():
     user_id = request.json['member_id']
@@ -136,6 +116,7 @@ def get_my_transactions():
 
 # Calculate the total debt
 @app.route("/calculate-debt", methods=["POST"])
+@jwt_required()
 @handle_exceptions
 def calculate_my_debt():
     member_id = request.json["member_id"]
@@ -154,13 +135,33 @@ def calculate_my_debt():
 
 
 @app.route("/highest_paying_customers")
+@jwt_required()
+@admin_access_routes()
+@handle_exceptions
 def get_highest_paying_customers():
     return get_highest_paying_members()
 
 
 @app.route("/famous_books")
+@jwt_required()
+@handle_exceptions
 def get_famous_books():
     return get_famous_books_list()
+
+
+@jwt.expired_token_loader
+def expired_token_loader(jwt_header, jwt_data):
+    return response_formatter("Token Expired", 401)
+
+
+@jwt.invalid_token_loader
+def invalid_token_loader(err):
+    return response_formatter("Signature Verification failed", 401)
+
+
+@jwt.unauthorized_loader
+def missing_token(err):
+    return response_formatter("Request doesn't contain valid token", 401)
 
 
 if __name__ == '__main__':

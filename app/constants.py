@@ -21,5 +21,6 @@ ERROR_CONSTANTS = {
     "ERR_NO_TRANSACTION": {"message": "No Transaction record found.", "status": 400},
     "MAX_TRANSACTION_LIMIT": {"message": "Please pay {x} rupees in order to close the transaction.", "status": 200},
     "TRANSACTION_SUCCESS": {"message": "You paid {x} rupees while submitting the books", "status": 200},
-    "ERR_TRANSACTION_EXISTS": {"message": "Transaction already exists", "status": 400}
+    "ERR_TRANSACTION_EXISTS": {"message": "Transaction already exists", "status": 400},
+    "ERR_UNAUTHORIZED": {"message": "You don't have access to view other member details", "status": 403 }
 }

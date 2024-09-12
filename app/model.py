@@ -31,10 +31,14 @@ class Member(Db.Model):
             'id': self.id, 'name': self.name, 'email': self.email, 'role': self.role
         }
 
-    def update_profile(self):
+    def get_all_details(self):
         return {
             'id': self.id, 'name': self.name, 'email': self.email, 'role': self.role, 'password': self.password
         }
+
+    @classmethod
+    def get_member_by_email(cls, email):
+        return cls.query.filter_by(email=email).first()
 
 
 class BookMember(Db.Model):

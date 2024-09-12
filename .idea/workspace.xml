@@ -4,11 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="909a01c4-1441-4c60-b04a-559469edcb76" name="Changes" comment="Added hashing passwords for new users">
-      <change afterPath="$PROJECT_DIR$/app/auth.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/utils.py" afterDir="false" />
+    <list default="true" id="909a01c4-1441-4c60-b04a-559469edcb76" name="Changes" comment="Added bcrypt module and blueprint">
+      <change afterPath="$PROJECT_DIR$/app/.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/book.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/books.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/member.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/members.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/constants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes.py" afterDir="false" />
     </list>
@@ -56,9 +62,14 @@
     &quot;Python.main.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;
+    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.import&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/app/auth" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="app" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="pythonProject" />
@@ -144,7 +155,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725889181227</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Added bcrypt module and blueprint">
+      <option name="closed" value="true" />
+      <created>1725960870158</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1725960870158</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -173,6 +192,7 @@
     <MESSAGE value="Commits before migrations" />
     <MESSAGE value="Added 2 routes to get famous booksand highest paying members&#10;while getting details of single transactions, check is debt is closed or not(calculate_debt must have 3 parameters" />
     <MESSAGE value="Added hashing passwords for new users" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added hashing passwords for new users" />
+    <MESSAGE value="Added bcrypt module and blueprint" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added bcrypt module and blueprint" />
   </component>
 </project>
